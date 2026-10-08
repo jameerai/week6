@@ -1,0 +1,316 @@
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(const MyApp());
+}
+
+// Root Application with Global ThemeData
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'Custom Widgets & Theming Demo',
+      // Step-2: Define Global ThemeData
+      theme: ThemeData(
+        useMaterial3: true,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors.teal,
+          primary: Colors.teal,
+          secondary: Colors.amber,
+        ),
+        scaffoldBackgroundColor: Colors.grey.shade100,
+        // Custom Text Theme
+        textTheme: TextTheme(
+          headlineMedium: TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+            color: Colors.teal.shade900,
+          ),
+          bodyLarge: const TextStyle(
+            fontSize: 16,
+            color: Colors.black87,
+          ),
+          bodyMedium: TextStyle(
+            fontSize: 14,
+            color: Colors.grey.shade700,
+          ),
+        ),
+        // Custom Card Theme
+        cardTheme: CardTheme(
+          elevation: 3,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+        ),
+        // Global Elevated Button Theme
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.teal,
+            foregroundColor: Colors.white,
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+        ),
+      ),
+      home: const ProfileScreen(),
+    );
+  }
+}
+
+// ==========================================
+// CUSTOM REUSABLE WIDGETS
+// ==========================================
+
+// 1. Custom Avatar Widget
+class CustomAvatar extends StatelessWidget {
+  final double radius;
+  final String? imageUrl;
+  final String? initials;
+  final Color? backgroundColor;
+
+  const CustomAvatar({
+    super.key,
+    required this.radius,
+    this.imageUrl,
+    this.initials,
+    this.backgroundColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    // Access fallback color from current theme if not explicitly passed
+    final effectiveBgColor =
+        backgroundColor ?? Theme.of(context).colorScheme.primaryContainer;
+
+    return CircleAvatar(
+      radius: radius,
+      backgroundColor: effectiveBgColor,
+      backgroundImage:
+          imageUrl != null ? NetworkImage(imageUrl!) : null,
+      child: imageUrl == null && initials != null
+          ? Text(
+              initials!,
+              style: TextStyle(
+                fontSize: radius * 0.7,
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.onPrimaryContainer,
+              ),
+            )
+          : null,
+    );
+  }
+}
+
+// 2. Profile Card Widget
+class ProfileCard extends StatelessWidget {
+  final String title;
+  final String subtitle;
+  final IconData? trailingIcon;
+  final VoidCallback? onTap;
+
+  const ProfileCard({
+    super.key,
+    required this.title,
+    required this.subtitle,
+    this.trailingIcon,
+    this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: ListTile(
+            leading: CircleAvatar(
+              backgroundColor: Theme.of(context).colorScheme.secondary.withOpacity(0.2),
+              child: Icon(
+                Icons.person,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+            ),
+            title: Text(
+              title,
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+            ),
+            subtitle: Text(
+              subtitle,
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+            trailing: trailingIcon != null
+                ? Icon(
+                    trailingIcon,
+                    color: Theme.of(context).colorScheme.primary,
+                  )
+                : null,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// 3. Custom Button Widget (With Gradient Background)
+class CustomButton extends StatelessWidget {
+  final String label;
+  final VoidCallback onPressed;
+  final List<Color>? gradientColors;
+
+  const CustomButton({
+    super.key,
+    required this.label,
+    required this.onPressed,
+    this.gradientColors,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    // Default gradient derived from active theme primary/secondary scheme
+    final List<Color> colors = gradientColors ??
+        [
+          Theme.of(context).colorScheme.primary,
+          Theme.of(context).colorScheme.primary.withOpacity(0.8),
+        ];
+
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: colors,
+          begin: Alignment.centerLeft,
+          end: Alignment.centerRight,
+        ),
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: const [
+          BoxShadow(
+            color: Colors.black12,
+            blurRadius: 4,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.transparent,
+          shadowColor: Colors.transparent,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+        onPressed: onPressed,
+        child: Text(
+          label,
+          style: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ==========================================
+// PROFILE SCREEN DEMO
+// ==========================================
+
+class ProfileScreen extends StatelessWidget {
+  const ProfileScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Profile Screen'),
+        centerTitle: true,
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        foregroundColor: Colors.white,
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          children: [
+            const SizedBox(height: 12),
+            // Custom Avatar displaying initials fallback
+            const CustomAvatar(
+              radius: 50,
+              initials: 'JD',
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'User Profile',
+              style: Theme.of(context).textTheme.headlineMedium,
+            ),
+            const SizedBox(height: 24),
+
+            // Profile Card usage
+            ProfileCard(
+              title: 'John Doe',
+              subtitle: 'john.doe@example.com',
+              trailingIcon: Icons.settings,
+              onTap: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Settings Tapped')),
+                );
+              },
+            ),
+            const SizedBox(height: 12),
+
+            ProfileCard(
+              title: 'Phone Number',
+              subtitle: '+1 (555) 019-2834',
+              trailingIcon: Icons.edit,
+              onTap: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Edit Phone Tapped')),
+                );
+              },
+            ),
+            const SizedBox(height: 32),
+
+            // Custom Button with global Theme styling
+            SizedBox(
+              width: double.infinity,
+              child: CustomButton(
+                label: 'Edit Profile',
+                onPressed: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Edit Profile Pressed')),
+                  );
+                },
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // Custom Button demonstrating local gradient override
+            SizedBox(
+              width: double.infinity,
+              child: CustomButton(
+                label: 'Settings (Local Gradient Override)',
+                gradientColors: [
+                  Theme.of(context).colorScheme.secondary,
+                  Colors.orange.shade700,
+                ],
+                onPressed: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Settings Pressed')),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
